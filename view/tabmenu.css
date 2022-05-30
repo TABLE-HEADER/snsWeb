@@ -1,0 +1,69 @@
+.title1, .title2, .title3, .title4, .title5, .title6, .title7, .body1, .body2, .body3, .body4, .body5, .body6, .body7 {
+	border: 2px solid blue;
+}
+
+.tabtitle {
+	border-bottom: none;
+	padding: .3em .5em;
+	border-radius: .3em .3em 0 0;
+	text-align: center;
+	display: table;
+}
+.tabbody > div {
+	width: calc(98vw - 280px);
+	height: calc(80vh - 300px);
+	border-radius: 0 .3em .3em .3em;
+	padding: 1em;
+	overflow-y: scroll;
+}
+/* radio non-display */
+.c2 .radio {
+	display: none;
+}
+/* tabs position */
+.c2 {
+	display: flex;
+	flex-wrap: wrap;
+	position: relative;
+}
+.title6 {
+	margin-left: auto;
+}
+.title7 {
+	margin-right: 5px;
+}
+.c2::after {
+	content: "";
+	width: 100%;
+}
+.c2 .tabtitle {
+	position: relative;
+	border-bottom: 2px solid transparent;
+	top: 2px;
+	left: 2px;
+}
+.c2 .tabtitle:hover {
+	cursor: pointer;
+}
+.c2 .tabbody {
+	order: 1;
+}
+
+/* tab's body init */
+.add-control .tabbody > div {
+	display: none;
+}
+
+/* selected tab's color change */
+.add-control .radio:checked + .tabtitle {
+	color: #fff;
+	border-bottom-color: #fff;
+}
+.add-control #tab1:checked ~ .title1, #tab2:checked ~ .title2, #tab3:checked ~ .title3, #tab4:checked ~ .title4, #tab5:checked ~ .title5, #tab6:checked ~ .title6, #tab7:checked ~ .title7 {
+	background: blue
+}
+
+/* tabs control */
+.add-control #tab1:checked ~ .tabbody > .body1, #tab2:checked ~ .tabbody > .body2, #tab3:checked ~ .tabbody > .body3, #tab4:checked ~ .tabbody > .body4, #tab5:checked ~ .tabbody > .body5, #tab6:checked ~ .tabbody > .body6, #tab7:checked ~ .tabbody > .body7 {
+	display: block;
+}
