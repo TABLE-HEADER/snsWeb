@@ -89,6 +89,9 @@ public class SignupServlet extends HttpServlet{
 
 					}catch(NumberFormatException e) {
 						formMessage.add("【生年月日】生年月日が無効です。");
+						year = "";
+						month = "";
+						day = "";
 						birthday = "";
 					}
 				}
@@ -98,6 +101,10 @@ public class SignupServlet extends HttpServlet{
 				}
 				else if(!email.matches("^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\\.)+[a-zA-Z]{2,}$")) {
 					formMessage.add("【メールアドレス】メールアドレスが無効です。");
+					email = "";
+				}
+				else if(objDao.selectByEmail(email).getUserid() != null) {
+					formMessage.add("【メールアドレス】そのメールアドレスは既に使用されています。");
 					email = "";
 				}
 

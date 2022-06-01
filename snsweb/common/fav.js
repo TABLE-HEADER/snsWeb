@@ -3,7 +3,7 @@ let fav_bool_js = {};
 let follow_bool_js = {};
 var userid_js = "";
 
-function changeFav(id, fav_bool, count, userid){
+function changeFav(id, fav_bool, count, text, agentid, userid){
 
 	// html要素の取得
 	const fav = document.getElementsByClassName("fav_" + id);
@@ -11,14 +11,16 @@ function changeFav(id, fav_bool, count, userid){
 	userid_js = userid;
 
 	// objectにbool情報を追加
-	var fav_bool_check = fav_bool_js[id];
-	if(fav_bool_check === undefined){
-		fav_bool_js[id] = !fav_bool;
+	if(fav_bool_js[id] === undefined){
+		fav_bool_js[id] = {};
+		fav_bool_js[id]["bool"] = !fav_bool;
+		fav_bool_js[id]["agent"] = agentid;
+		fav_bool_js[id]["text"] = text;
 		fav_bool_check = !fav_bool;
 	}
 	else{
-		fav_bool_check = !fav_bool_check
-		fav_bool_js[id] = fav_bool_check;
+		fav_bool_check = !fav_bool_js[id]["bool"];
+		fav_bool_js[id]["bool"] = fav_bool_check;
 	}
 
 	const heart = (fav_bool_check === true) ? "❤" : "♡";
@@ -97,12 +99,28 @@ window.addEventListener('beforeunload', function() {
 
 		var sql1 = "INSERT INTO favinfo VALUES ";
 		var sql2 = "DELETE FROM favinfo WHERE ";
+		var sql5 = "INSERT INTO informinfo VALUES ";
 		var count1 = 0;
 		var count2 = 0;
+		var count5 = 0;
+		var text = "";
 		Object.keys(fav_bool_js).forEach(function(key) {
-			if(this[key] === true){
+			if(this[key]["bool"] === true){
 				sql1 += "(" + key + ", '" + userid_js + "', NOW()), ";
 				count1++;
+				if(this[key]["agent"] != userid_js) {
+					sql5 += "(null, '" + this[key]["agent"] + "', '" + userid_js + "', 'fav', '" +
+					"あなたのコメント(" + key + ")をお気に入りしました";
+					text = this[key]["text"];
+					if(text.length > 0){
+						if(text.length >= 21){
+							text = text.substring(0,20) + "…";
+						}
+						sql5 += "：「" + text + "」";
+					}
+					sql5 += "', false, NOW()), ";
+					count5++;
+				}
 			}
 			else{
 				sql2 += "(id = " + key + " AND userid = '" + userid_js + "') OR ";
@@ -127,6 +145,12 @@ window.addEventListener('beforeunload', function() {
 			if(this[key] === true){
 				sql3 += "('" + userid_js + "', '" + key + "', NOW()), ";
 				count3++;
+				if(key != userid_js){
+					sql5 += "(null, '" + key + "', '" + userid_js + "', 'follow', '" +
+					"あなたをフォローしました" +
+					"', false, NOW()), ";
+					count5++;
+				}
 			}
 			else{
 				sql4 += "(followerid = '" + userid_js + "' AND followedid = '" + key + "') OR ";
@@ -135,18 +159,23 @@ window.addEventListener('beforeunload', function() {
 		}, follow_bool_js);
 		sql3 = sql3.slice(0, -2);
 		sql4 = sql4.slice(0, -4);
+		sql5 = sql5.slice(0, -2);
 		sql3 += " ON DUPLICATE KEY UPDATE date = VALUES(date)";
+		sql5 += " ON DUPLICATE KEY UPDATE date = VALUES(date)";
 		if(count3 === 0) {
 			sql3 = "";
 		}
 		if(count4 === 0) {
 			sql4 = "";
 		}
+		if(count5 === 0) {
+			sql5 = "";
+		}
 
 		$.ajax({
 			url: "http://localhost:8080/snsweb/executeSQL",
 			type: "POST",
-			data: {sql1:sql1, sql2:sql2, sql3:sql3, sql4:sql4},
+			data: {sql1:sql1, sql2:sql2, sql3:sql3, sql4:sql4, sql5:sql5},
 			error: function (response) {
 				alert(response);
 			}

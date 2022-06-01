@@ -33,7 +33,7 @@ public class DeleteCommentServlet extends HttpServlet{
 
 				// エンコーディング
 				request.setCharacterEncoding("UTF-8");
-		 		int id = Integer.parseInt(request.getParameter("id"));
+		 		int id = Integer.parseInt(request.getParameter("delid"));
 
 		 		// コメント情報の削除
 		 		CommentDAO objDao = new CommentDAO();

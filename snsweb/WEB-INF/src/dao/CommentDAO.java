@@ -1000,6 +1000,8 @@ public class CommentDAO{
 		+ comment.getParentid() + ", "
 		+ "'" + comment.getDate() + "'" + ")";
 
+		sql = sql.replace("'null'", "NULL");
+
 		Connection con = null;
 		PreparedStatement  smt = null;
 
@@ -1071,6 +1073,8 @@ public class CommentDAO{
 		+ "parentid = " + comment.getParentid() + ", "
 		+ "date = '" + comment.getDate() + "'" + " "
 		+ "WHERE id = " + comment.getId() + "";
+
+		sql = sql.replace("'null'", "NULL");
 
 		Connection con = null;
 		PreparedStatement  smt = null;

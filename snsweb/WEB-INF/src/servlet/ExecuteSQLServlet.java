@@ -36,7 +36,7 @@ public class ExecuteSQLServlet extends HttpServlet{
 				request.setCharacterEncoding("UTF-8");
 				ArrayList<String> sql_list = new ArrayList<String>();
 
-				for(int i = 1; i <= 4; i++) {
+				for(int i = 1; i <= 5; i++) {
 					String sql = request.getParameter("sql" + i);
 					if(!sql.equals("")) {
 						sql_list.add(sql);

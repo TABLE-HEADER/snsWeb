@@ -39,7 +39,10 @@
 	ArrayList<User> followed_list = (ArrayList<User>)request.getAttribute("followed_list");
 	ArrayList<User> follower_list = (ArrayList<User>)request.getAttribute("follower_list");
 
-	boolean visible = Boolean.parseBoolean(request.getParameter("visible"));
+	Boolean visible = (Boolean)request.getAttribute("visible");
+	if(visible == null){
+		visible = false;
+	}
 
 	// searchの実行
 	if(text != null && type != null){
@@ -69,7 +72,7 @@
 										</td>
 										<td align="left">
 											<%=u.getName() %><font size="2" color="grey">@<%=u.getUserid() %></font><%=u.getPrivacy() ? "🔑" : "" %>
-											<p><%=u.getProfile().replace("\n", "<br>") %></p>
+											<p><%=u.getProfile() == null ? "&nbsp;" : u.getProfile().replace("\n", "<br>") %></p>
 										</td>
 									</tr>
 								</table>
@@ -128,7 +131,7 @@
 												<div class="dropdown_body" align="left">
 													<ul class="dropdown_list">
 														<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 														<%} %>
 														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 													</ul>
@@ -146,7 +149,7 @@
 										<%}
 										else {%>
 											<td align="right" valign="bottom" width="96px">
-												<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+												<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 												<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 												<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 												<span class="comCount"><%=com.getComCount() %></span>
@@ -215,7 +218,7 @@
 												<div class="dropdown_body" align="left">
 													<ul class="dropdown_list">
 														<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 														<%} %>
 														<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 													</ul>
@@ -233,7 +236,7 @@
 										<%}
 										else {%>
 											<td align="right" valign="bottom" width="96px">
-												<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+												<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 												<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 												<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 												<span class="comCount"><%=com.getComCount() %></span>
@@ -247,6 +250,7 @@
 													<div align="center">
 														<textarea name="text" placeholder="上のコメントに返信" style="resize: none; width:95%; height:72px"></textarea>
 														<input type="hidden" name="reply_id" value="<%=com.getId() %>">
+														<input type="hidden" name="reply_userid" value="<%=com.getUserid() %>">
 													</div>
 													<div align="right" style="padding-right:4vw">
 														<input type="file" id="uploadImg" accept=".png, .jpg, .jpeg, .bmp">
@@ -291,7 +295,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(rep.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=rep.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=rep.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -309,7 +313,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=rep.getId()%>" onclick="changeFav(<%=rep.getId()%>,<%=rep.getFav()%>,<%=rep.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=rep.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=rep.getId()%>" onclick="changeFav(<%=rep.getId()%>,<%=rep.getFav()%>,<%=rep.getFavCount() %>,'<%=rep.getText() %>','<%=rep.getUserid() %>','<%=user_cont.getUserid() %>');"><%=rep.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=rep.getId()%>"><%=rep.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=rep.getId() %>'">💬</span>
 														<span class="comCount"><%=rep.getComCount() %></span>
@@ -358,7 +362,7 @@
 									<%} %>
 									<%=user_page.getPrivacy() ? "🔑" : "" %>
 								<br>
-								<p><%=user_page.getProfile() == null ? "プロフィール未設定" : user_page.getProfile() %></p>
+								<p><%=user_page.getProfile() == null ? "&nbsp;" : user_page.getProfile().replace("\n", "<br>") %></p>
 								<%=count[0] %> フォロー&emsp;&emsp;<span class="followCount_<%=user_page.getUserid()%>"><%=count[1] %></span> フォロワー
 							</td>
 						</tr>
@@ -407,7 +411,7 @@
 													<div class="dropdown_body" align="left">
 														<ul class="dropdown_list">
 															<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 															<%} %>
 															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 														</ul>
@@ -425,7 +429,7 @@
 											<%}
 											else {%>
 												<td align="right" valign="bottom" width="96px">
-													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 													<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 													<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 													<span class="comCount"><%=com.getComCount() %></span>
@@ -467,7 +471,7 @@
 													<div class="dropdown_body" align="left">
 														<ul class="dropdown_list">
 															<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 															<%} %>
 															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 														</ul>
@@ -485,7 +489,7 @@
 											<%}
 											else {%>
 												<td align="right" valign="bottom" width="96px">
-													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 													<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 													<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 													<span class="comCount"><%=com.getComCount() %></span>
@@ -527,7 +531,7 @@
 													<div class="dropdown_body" align="left">
 														<ul class="dropdown_list">
 															<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 															<%} %>
 															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 														</ul>
@@ -545,7 +549,7 @@
 											<%}
 											else {%>
 												<td align="right" valign="bottom" width="96px">
-													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 													<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 													<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 													<span class="comCount"><%=com.getComCount() %></span>
@@ -587,7 +591,7 @@
 													<div class="dropdown_body" align="left">
 														<ul class="dropdown_list">
 															<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 															<%} %>
 															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 														</ul>
@@ -605,7 +609,7 @@
 											<%}
 											else {%>
 												<td align="right" valign="bottom" width="96px">
-													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 													<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 													<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 													<span class="comCount"><%=com.getComCount() %></span>
@@ -634,7 +638,7 @@
 												&emsp;<a class="btn btn_follow_<%=u.getUserid() %> btn_follow_<%=u.getFollowed()%>" onclick="changeFollow('<%=u.getUserid()%>',<%=u.getFollowed()%>,'<%=user_cont.getUserid() %>');"><span class="follow follow_<%=u.getUserid()%>" ><%=u.getFollowed() == true ? "フォロー済み" : "フォロー" %></span></a>
 												<%} %>
 												<%=u.getPrivacy() ? "🔑" : "" %>
-												<p><%=u.getProfile().replace("\n", "<br>") %></p>
+												<p><%=u.getProfile() == null ? "&nbsp;" : u.getProfile().replace("\n", "<br>") %></p>
 											</td>
 										</tr>
 									</table>
@@ -658,7 +662,7 @@
 												&emsp;<a class="btn btn_follow_<%=u.getUserid() %> btn_follow_<%=u.getFollowed()%>" onclick="changeFollow('<%=u.getUserid()%>',<%=u.getFollowed()%>,'<%=user_cont.getUserid() %>');"><span class="follow follow_<%=u.getUserid()%>" ><%=u.getFollowed() == true ? "フォロー済み" : "フォロー" %></span></a>
 												<%} %>
 												<%=u.getPrivacy() ? "🔑" : "" %>
-												<p><%=u.getProfile().replace("\n", "<br>") %></p>
+												<p><%=u.getProfile() == null ? "&nbsp;" : u.getProfile().replace("\n", "<br>") %></p>
 											</td>
 										</tr>
 									</table>
@@ -694,7 +698,7 @@
 				<div class= "add-control">
 					<div class="c2">
 
-						<input type="radio" id="tab1" class="radio" name="tab" checked="checked" ><label class="tabtitle title1" for="tab1">話題のコメント</label>
+						<input type="radio" id="tab1" class="radio" name="tab" checked="checked" ><label class="tabtitle title1" for="tab1">新着コメント</label>
 						<div class="tabbody">
 							<div class="body1" style="height: calc(98vh - 260px)">
 								<%if(timeline_list == null || timeline_list.size() == 0){ %>
@@ -726,7 +730,7 @@
 													<div class="dropdown_body" align="left">
 														<ul class="dropdown_list">
 															<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 															<%} %>
 															<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 														</ul>
@@ -744,7 +748,7 @@
 											<%}
 											else {%>
 												<td align="right" valign="bottom" width="96px">
-													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+													<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 													<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 													<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 													<span class="comCount"><%=com.getComCount() %></span>
@@ -817,7 +821,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -835,7 +839,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 														<span class="comCount"><%=com.getComCount() %></span>
@@ -877,7 +881,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -895,7 +899,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 														<span class="comCount"><%=com.getComCount() %></span>
@@ -938,7 +942,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -956,7 +960,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 														<span class="comCount"><%=com.getComCount() %></span>
@@ -998,7 +1002,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -1016,7 +1020,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 														<span class="comCount"><%=com.getComCount() %></span>
@@ -1059,7 +1063,7 @@
 														<div class="dropdown_body" align="left">
 															<ul class="dropdown_list">
 																<%if(user_cont != null && (user_cont.getUserid().equals(com.getUserid()) || user_cont.getAuthority())) { %>
-																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?id=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
+																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/deleteComment?delid=<%=com.getId() %>" class="dropdown_item-link">削除</a></li>
 																<%} %>
 																<li class="dropdown_item"><a href="<%=request.getContextPath() %>/mainpage" class="dropdown_item-link">コメントを報告</a></li>
 															</ul>
@@ -1077,7 +1081,7 @@
 												<%}
 												else {%>
 													<td align="right" valign="bottom" width="96px">
-														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
+														<span class="fav fav_<%=com.getId()%>" onclick="changeFav(<%=com.getId()%>,<%=com.getFav()%>,<%=com.getFavCount() %>,'<%=com.getText().replace("\r\n"," ") %>','<%=com.getUserid() %>','<%=user_cont.getUserid() %>');"><%=com.getFav() == true ? "❤" : "♡" %></span>
 														<span class="favCount_<%=com.getId()%>"><%=com.getFavCount() %></span>
 														<span class="com" onclick="location.href='<%=request.getContextPath() %>/mainpage?id=<%=com.getId() %>'">💬</span>
 														<span class="comCount"><%=com.getComCount() %></span>
@@ -1105,7 +1109,7 @@
 													&emsp;<a class="btn btn_follow_<%=u.getUserid() %> btn_follow_<%=u.getFollowed()%>" onclick="changeFollow('<%=u.getUserid()%>',<%=u.getFollowed()%>,'<%=user_cont.getUserid() %>');"><span class="follow follow_<%=u.getUserid()%>" ><%=u.getFollowed() == true ? "フォロー済み" : "フォロー" %></span></a>
 													<%} %>
 													<%=u.getPrivacy() ? "🔑" : "" %>
-													<p><%=u.getProfile().replace("\n", "<br>") %></p>
+													<p><%=u.getProfile() == null ? "&nbsp;" : u.getProfile().replace("\n", "<br>") %></p>
 												</td>
 											</tr>
 										</table>
@@ -1129,7 +1133,7 @@
 													&emsp;<a class="btn btn_follow_<%=u.getUserid() %> btn_follow_<%=u.getFollowed()%>" onclick="changeFollow('<%=u.getUserid()%>',<%=u.getFollowed()%>,'<%=user_cont.getUserid() %>');"><span class="follow follow_<%=u.getUserid()%>" ><%=u.getFollowed() == true ? "フォロー済み" : "フォロー" %></span></a>
 													<%} %>
 													<%=u.getPrivacy() ? "🔑" : "" %>
-													<p><%=u.getProfile().replace("\n", "<br>") %></p>
+													<p><%=u.getProfile() == null ? "&nbsp;" : u.getProfile().replace("\n", "<br>") %></p>
 												</td>
 											</tr>
 										</table>

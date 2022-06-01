@@ -71,7 +71,7 @@ public class UserpageServlet extends HttpServlet{
 					ArrayList<User> followed_list;
 					ArrayList<User> follower_list;
 
-					if(!user_page.getPrivacy() || (user != null && usrDao.isFollower(user_page.getUserid(), user.getUserid()))) {
+					if(!user_page.getPrivacy() || (user != null && usrDao.isFollower(user_page.getUserid(), user.getUserid())) || user.getUserid().equals(user_page.getUserid())) {
 
 						if(user == null) {
 							com_self_list = comDao.selectSelfComment(user_page.getUserid(), count);

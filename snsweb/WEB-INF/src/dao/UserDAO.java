@@ -75,6 +75,56 @@ public class UserDAO{
 		return user;
 	}
 
+	// selectByEmail
+	public User selectByEmail(String email) {
+
+		//変数宣言
+		Connection con = null;
+		Statement  smt = null;
+		User user = new User();
+
+		//SQL文
+		String sql = "SELECT * FROM userinfo WHERE email = '" + email + "'";
+
+		try{
+			con = getConnection();
+			smt = con.createStatement();
+
+			ResultSet rs = smt.executeQuery(sql);
+
+			//取得した結果をUserオブジェクトに格納
+			if(rs.next()){
+				user.setUserid(rs.getString("userid"));
+				user.setPassword(rs.getString("password"));
+				user.setName(rs.getString("name"));
+				user.setBirthday(rs.getString("birthday"));
+				user.setEmail(rs.getString("email"));
+				user.setPhone(rs.getString("phone"));
+				user.setProfile(rs.getString("profile"));
+				user.setAddress(rs.getString("address"));
+				user.setAuthority(rs.getBoolean("authority"));
+				user.setPrivacy(rs.getBoolean("privacy"));
+				user.setAllow_dm(rs.getBoolean("allow_dm"));
+				user.setBan(rs.getBoolean("ban"));
+				user.setIcon(ImageConvert.getByteFromResult(rs, "icon"));
+				user.setDate(rs.getString("date"));
+
+			}
+
+		}catch(Exception e){
+			throw new IllegalStateException(e);
+		}finally{
+			//リソースの開放
+			if(smt != null){
+				try{smt.close();}catch(SQLException ignore){}
+			}
+			if(con != null){
+				try{con.close();}catch(SQLException ignore){}
+			}
+		}
+		return user;
+	}
+
 	// selectByUseridAndPass
 	public User selectByUseridAndPass(String userid, String password) {
 
@@ -600,6 +650,8 @@ public class UserDAO{
 		+ "?" + ", "
 		+ "'" + user.getDate() + "'" + ")";
 
+		sql = sql.replace("'null'", "NULL");
+
 		Connection con = null;
 		PreparedStatement  smt = null;
 
@@ -676,6 +728,8 @@ public class UserDAO{
 		+ "icon = ? , "
 		+ "date = '" + user.getDate() + "'" + " "
 		+ "WHERE userid = '" + user.getUserid() + "'";
+
+		sql = sql.replace("'null'", "NULL");
 
 		Connection con = null;
 		PreparedStatement  smt = null;

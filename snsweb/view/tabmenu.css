@@ -67,3 +67,10 @@
 .add-control #tab1:checked ~ .tabbody > .body1, #tab2:checked ~ .tabbody > .body2, #tab3:checked ~ .tabbody > .body3, #tab4:checked ~ .tabbody > .body4, #tab5:checked ~ .tabbody > .body5, #tab6:checked ~ .tabbody > .body6, #tab7:checked ~ .tabbody > .body7 {
 	display: block;
 }
+
+.inf {
+	height: calc(98vh - 620px);
+	width:80%;
+	padding: 1em;
+	overflow-y: scroll;
+}

@@ -19,9 +19,22 @@ public class UpdateProfileServlet extends HttpServlet{
 		String cmd = "";
 		ArrayList<String> formMessage = new ArrayList<String>();
 
+		// セッションスコープからuser情報を取得
+		HttpSession session = request.getSession();
+		User user = (User)session.getAttribute("user");
+
+		if(user == null) {
+
+			// セッション切れならerror.jspへフォワード
+			error = "セッションがタイムアウトしました。";
+			cmd = "signout";
+			return;
+
+		}
+
 		// 変数宣言
 		UserDAO objDao = new UserDAO();
-		User user = new User();
+		User user_new = new User();
 
 		// エンコーディング
 		request.setCharacterEncoding("UTF-8");
@@ -65,10 +78,10 @@ public class UpdateProfileServlet extends HttpServlet{
 					formMessage.add("【ユーザーID】ユーザーIDには半角英数字またはアンダーバー(_)のみが使用できます。");
 					userid = "";
 				}
-//				else if(objDao.selectByUserid(userid).getUserid() != null) {
-//					formMessage.add("【ユーザーID】そのユーザーIDは既に使用されています。");
-//					userid = "";
-//				}
+				else if(!user.getUserid().equals(userid) && objDao.selectByUserid(userid).getUserid() != null) {
+					formMessage.add("【ユーザーID】そのユーザーIDは既に使用されています。");
+					userid = "";
+				}
 
 				if(year.equals("") || month.equals("") || day.equals("")) {
 					formMessage.add("【生年月日】生年月日が未入力です。");
@@ -96,6 +109,9 @@ public class UpdateProfileServlet extends HttpServlet{
 
 					}catch(NumberFormatException e) {
 						formMessage.add("【生年月日】生年月日が無効です。");
+						year = "";
+						month = "";
+						day = "";
 						birthday = "";
 					}
 				}
@@ -105,6 +121,10 @@ public class UpdateProfileServlet extends HttpServlet{
 				}
 				else if(!email.matches("^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\\.)+[a-zA-Z]{2,}$")) {
 					formMessage.add("【メールアドレス】メールアドレスが無効です。");
+					email = "";
+				}
+				else if(!user.getEmail().equals(email) && objDao.selectByEmail(email).getUserid() != null) {
+					formMessage.add("【メールアドレス】そのメールアドレスは既に使用されています。");
 					email = "";
 				}
 
@@ -172,18 +192,16 @@ public class UpdateProfileServlet extends HttpServlet{
 					}
 					else {
 						// セッションスコープからuser情報を取得
-						HttpSession session = request.getSession();
-						bytes = ((User)session.getAttribute("user")).getIcon();
+						bytes = user.getIcon();
 					}
 
-					user = new User(userid, pass1, name, birthday, email, phone, profile, address, false, privacy, allow_dm, false, bytes, user.getDate());
+					user_new = new User(userid, pass1, name, birthday, email, phone, profile, address, false, privacy, allow_dm, false, bytes, user.getDate());
 
 					// ユーザーをデータベースに登録
-					objDao.update(user);
+					objDao.update(user_new);
 
 					// セッションスコープに値を追加後、フォワード
-					HttpSession session = request.getSession();
-					session.setAttribute("user", user);
+					session.setAttribute("user", user_new);
 					request.getRequestDispatcher("/mainpage").forward(request, response);
 
 				}

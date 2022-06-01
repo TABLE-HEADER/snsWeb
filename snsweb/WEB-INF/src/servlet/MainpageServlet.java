@@ -172,7 +172,6 @@ public class MainpageServlet extends HttpServlet{
 
 			}
 
-
 		}catch (NumberFormatException e) {
 			error = "不正なフォームアクセスです。";
 			cmd = "signout";
